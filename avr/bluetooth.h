@@ -2,9 +2,10 @@
 #define __BLUETOOTH__H__
 
 #include <avr/io.h>                         // AVR 기본 include
- 
 
-void init_uart1()                               // UART1 초기화 함수
+
+//블루투스 초기화 함수
+void init_bluetooth()                               
 {
 
     UCSR1B = 0x18;           // 송신 Transmit(TX), Receive(RX) Enable
@@ -15,23 +16,35 @@ void init_uart1()                               // UART1 초기화 함수
 
 }
 
-
-void putchar1(char c)                      // 1 문자를 송신(Transmit)하는 함수
+// 1개의 문자를 스마트폰측으로 보내는 함수
+void putchar1(char c)                      
 {
-
-     while(!(UCSR1A & (1<<UDRE))) ;           // UDRE : UCSR1A 5번 비트, UDRE의 define값 = 5
-                                                                   // 즉, 1을 5번 왼쪽으로 shift한 값이므로 0x20과 &
-     UDR1 = c;                                             // 1 문자 전송, 송신 데이터를 UDR0에 넣음
+	//데이터 송신 준비가 되었는지 체크
+     while(!(UCSR1A & (1<<UDRE))) ;           
+	//송신할 데이터 설정                           
+     UDR1 = c;                                             
 }
 
- 
-
+// 1개의 문자를 스마트폰으로부터 받는 함수
 char getchar1()                               // 1 문자를 수신(receive)하는 함수
 {
+	//데이터 수신 준비가 되었는지 체크
+     if ((UCSR1A & (1<<RXC1))) {
+	 	return(UDR1);						
+	 }           
+	//UDR1에서 수신 데이터를 가져옴                               
+     return 0;								
+}
 
-     while (!(UCSR1A & (1<<RXC1))) ;           // UCSR1A 7번 비트, RXC의 define 값 = 7
-                                                                   // 즉, 1을 7번 왼쪽으로 shift한 값이므로 0x80과 &
-     return(UDR1);                                       // 1 문자 수신, UDR1에서 수신 데이터를 가져옴
+// 스마트폰으로부터 명령(데이터)을 받아서 응답해주고 버튼이 눌린것으로 체크하는 함수
+int checkBluetooth(){
+	volatile char c = getchar1();     
+	if(c==1){
+		putchar1(c);
+		c = 0;
+		return 1;
+	}
+	return 0;
 }
 
 #endif

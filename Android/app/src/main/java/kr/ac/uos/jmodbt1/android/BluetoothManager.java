@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -47,48 +48,34 @@ public class BluetoothManager {
         callback = null;
     }
 
-    public BluetoothDevice getCheckDevcie() {
+    public ArrayList<BluetoothDevice> getDevcies() {
+        ArrayList<BluetoothDevice> list = new ArrayList<>();
         Set<BluetoothDevice> devices = mBluetoothAdatper.getBondedDevices();
-        if (devices.size() != 0) {
-            for (BluetoothDevice device : devices) {
-                Log.i(tag, "bounded device : " + device.getName() + " / " + device.getAddress());
-                ParcelUuid[] uuids = device.getUuids();
-                for (int i = 0; i < uuids.length; i++) {
-                    Log.i(tag, "uudis : " + uuids[i].toString());
-                }
-
-                if(device.getAddress().equals("20:15:10:26:25:78"))return device;
-            }
+        for (BluetoothDevice device : devices) {
+            list.add(device);
         }
-        return null;
+        return list;
     }
 
-    Handler toastHandler = new Handler(Looper.getMainLooper());
-    public BluetoothSocket getBluetoothSocket() {
-        if (mBluetoothSocket != null) return mBluetoothSocket;
-
-        BluetoothDevice device = getCheckDevcie();
-        if (device == null) {
-            toastHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(mContext, "디바이스와 연결해주세요.", Toast.LENGTH_SHORT).show();
-                }
-            });
-            return null;
-        }
+    public boolean connect(BluetoothDevice device) {
+        if (device == null) return false;
 
         try {
             mBluetoothSocket = device.createRfcommSocketToServiceRecord(POMEAL_UUID);
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
 
+        return true;
+    }
+
+    public BluetoothSocket getBluetoothSocket(){
         return mBluetoothSocket;
     }
 
     public boolean isEanbled() {
-        return (getCheckDevcie() != null && mBluetoothThread != null);
+        return (mBluetoothThread != null);
     }
 
     public void start() {
@@ -179,9 +166,8 @@ public class BluetoothManager {
         }
 
         Handler handler = new Handler(Looper.getMainLooper());
-
         synchronized public void sendMessage(final int msg) {
-            Log.i(tag, "sendMessage : " + msg);
+            Log.i(tag, "sendMessage1 : " + msg);
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -189,6 +175,7 @@ public class BluetoothManager {
                     if (mPrintWriter == null) return;
                     mPrintWriter.write(msg);
                     mPrintWriter.flush();
+                    Log.i(tag, "sendMessage2 : " + msg);
                 }
             });
         }

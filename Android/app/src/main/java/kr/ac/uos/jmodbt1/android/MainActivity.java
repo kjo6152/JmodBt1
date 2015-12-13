@@ -17,11 +17,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        bluetoothManager = ((ApplicationContext)getApplication()).getBluetoothManager();
+
         ((ImageButton) findViewById(R.id.led_button)).setOnClickListener(this);
 
-        bluetoothManager = new BluetoothManager(this);
-        bluetoothManager.getCheckDevcie();
-        bluetoothManager.start();
     }
 
     @Override
@@ -29,7 +28,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.led_button:
                 Log.i(tag, "button pressed");
-                bluetoothManager.sendMessage('0'+1);
+                bluetoothManager.sendMessage(1);
                 break;
         }
     }
