@@ -1,16 +1,11 @@
 package kr.ac.uos.jmodbt1.android;
 
-import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Binder;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,24 +25,21 @@ import java.util.UUID;
 public class BluetoothManager {
     private static final String tag = BluetoothManager.class.getName();
 
-    public static final UUID POMEAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    public static final UUID JBT_MOD_1_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
     BluetoothAdapter mBluetoothAdatper = BluetoothAdapter.getDefaultAdapter();
 
     private Context mContext;
-    public BluetoothManager(Context context){
+
+    public BluetoothManager(Context context) {
         this.mContext = context;
     }
 
-    useCallback callback = null;
-    public void setCallback(useCallback callback) {
-        this.callback = callback;
-    }
-
-    public void removeCallback() {
-        callback = null;
-    }
-
+    /**
+     * 연결 가능한 디바이스 목록을 리턴한다.
+     *
+     * @return
+     */
     public ArrayList<BluetoothDevice> getDevcies() {
         ArrayList<BluetoothDevice> list = new ArrayList<>();
         Set<BluetoothDevice> devices = mBluetoothAdatper.getBondedDevices();
@@ -57,27 +49,57 @@ public class BluetoothManager {
         return list;
     }
 
-    public boolean connect(BluetoothDevice device) {
-        if (device == null) return false;
+    /** 별도의 스레드에서 연결시도 */
+    static Thread connectThread = null;
 
-        try {
-            mBluetoothSocket = device.createRfcommSocketToServiceRecord(POMEAL_UUID);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    /** 연결이 되었을 때 호출되는 콜백 인터페이스 */
+    interface BluetoothCallback {
+        void connect(boolean ret);
+    }
+
+    /**
+     * 블루투스 디바이스와 연결한다.
+     *
+     * @param device
+     * @return
+     */
+    public void connect(final BluetoothDevice device, final BluetoothCallback callback) {
+        if (device == null) {
+            callback.connect(false);
+            return;
         }
 
-        return true;
+        if (connectThread != null) {
+            Toast.makeText(mContext, "연결중입니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        connectThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mBluetoothSocket = device.createRfcommSocketToServiceRecord(JBT_MOD_1_UUID);
+                    mBluetoothSocket.connect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    callback.connect(false);
+                    connectThread = null;
+                    return;
+                }
+
+                callback.connect(true);
+            }
+        });
+
+        connectThread.start();
     }
 
-    public BluetoothSocket getBluetoothSocket(){
-        return mBluetoothSocket;
-    }
-
+    /** 통신이 가능한 상태인지 확인한다. */
     public boolean isEanbled() {
         return (mBluetoothThread != null);
     }
 
+    /** 블루투스 통신을 시작한다. */
     public void start() {
         if (mBluetoothThread != null) {
             tearDown();
@@ -86,6 +108,7 @@ public class BluetoothManager {
         mBluetoothThread.start();
     }
 
+    /** 블루투스 통신을 종료한다. */
     public void tearDown() {
         if (mBluetoothThread != null) mBluetoothThread.tearDown();
         mBluetoothThread = null;
@@ -93,45 +116,57 @@ public class BluetoothManager {
 
 
     Timer timer = null;
-    void cancelTimer(){
-        if(timer!=null)timer.cancel();
+
+    void cancelTimer() {
+        if (timer != null) timer.cancel();
         timer = null;
     }
 
-    void startRepeatTimer(TimerTask task){
+    void startRepeatTimer(TimerTask task) {
         cancelTimer();
         timer = new Timer();
-        timer.schedule(task,100,100);
+        timer.schedule(task, 100, 100);
     }
 
+    /**
+     * 메시지 송신을 위한 함수
+     * 통신의 신뢰성을 위해 응답이 올때까지 100ms마다 다시 보낸다.
+     *
+     * @param msg
+     */
     public void sendMessage(final int msg) {
-        if(isEanbled()==false){
+        if (isEanbled() == false) {
             Log.i(tag, "isEnabled false");
             start();
         }
 
-        TimerTask task = new TimerTask(){
+        TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                if(mBluetoothThread!=null)mBluetoothThread.sendMessage(msg);
+                if (mBluetoothThread != null) mBluetoothThread.sendMessage(msg);
             }
         };
 
         startRepeatTimer(task);
     }
 
-    BluetoothThread mBluetoothThread = null;
     BluetoothSocket mBluetoothSocket = null;
-    PrintWriter mPrintWriter = null;
-    BufferedReader mBufferedReader = null;
+    BluetoothThread mBluetoothThread = null;
 
+    /**
+     * 블루투스 기기와 통신하기 위한 스레드
+     * 블루투스 기기와 연결 후 데이터 수신을 위해 대기한다.
+     * 데이터가 수신되면 송신을 위한 타이머를 종료한다.
+     */
     class BluetoothThread extends Thread {
+        PrintWriter mPrintWriter = null;
+        BufferedReader mBufferedReader = null;
+
         @Override
         public void run() {
             Log.i(tag, "start client");
-            if (getBluetoothSocket() != null) {
+            if (mBluetoothSocket != null) {
                 try {
-                    mBluetoothSocket.connect();
                     mPrintWriter = new PrintWriter(mBluetoothSocket.getOutputStream());
                     mBufferedReader = new BufferedReader(new InputStreamReader(mBluetoothSocket.getInputStream()));
 
@@ -139,7 +174,6 @@ public class BluetoothManager {
                         int msg = mBufferedReader.read();
                         Log.i(tag, "receive data : " + msg);
                         cancelTimer();
-                        if (callback != null) callback.receive(msg);
                     }
 
                 } catch (IOException e) {
@@ -149,6 +183,9 @@ public class BluetoothManager {
             tearDown();
         }
 
+        /**
+         * 블루투스 소켓을 닫고 통신을 종료한다.
+         */
         public void tearDown() {
             Log.i(tag, "tearDown client");
             if (mBluetoothSocket != null) {
@@ -166,8 +203,13 @@ public class BluetoothManager {
         }
 
         Handler handler = new Handler(Looper.getMainLooper());
+
+        /**
+         * 연결된 블루투스 기기로 데이터를 보낸다.
+         *
+         * @param msg
+         */
         synchronized public void sendMessage(final int msg) {
-            Log.i(tag, "sendMessage1 : " + msg);
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -175,14 +217,10 @@ public class BluetoothManager {
                     if (mPrintWriter == null) return;
                     mPrintWriter.write(msg);
                     mPrintWriter.flush();
-                    Log.i(tag, "sendMessage2 : " + msg);
+                    Log.i(tag, "sendMessage : " + msg);
                 }
             });
         }
 
-    }
-
-    interface useCallback {
-        void receive(int msg);
     }
 }

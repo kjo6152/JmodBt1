@@ -40,6 +40,17 @@ void init_switch(){
 	sei(); // SREG |= 1<<7; // 1000 0000
 }
 
+//스위치1
+SIGNAL(SIG_INTERRUPT4){
+	isButtonClicked = TRUE;
+}
+
+//스위치2
+SIGNAL(SIG_INTERRUPT5){
+	isButtonClicked = TRUE;
+
+}
+
 //초기화 함수
 void init(){
 	//조도센서 초기화
@@ -50,17 +61,6 @@ void init(){
 	init_switch();
 	//블루투스 초기화
 	init_bluetooth();		
-}
-
-//스위치1
-SIGNAL(SIG_INTERRUPT4){
-	isButtonClicked = TRUE;
-}
-
-//스위치2
-SIGNAL(SIG_INTERRUPT5){
-	isButtonClicked = TRUE;
-
 }
 
 /**

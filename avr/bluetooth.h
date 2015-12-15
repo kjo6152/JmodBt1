@@ -36,7 +36,7 @@ char getchar1()                               // 1 문자를 수신(receive)하는 함수
      return 0;								
 }
 
-// 스마트폰으로부터 명령(데이터)을 받아서 응답해주고 버튼이 눌린것으로 체크하는 함수
+// 스마트폰으로부터 명령(데이터)을 받아서 응답해주고 버튼이 눌렸는지 리턴하는 함수
 int checkBluetooth(){
 	volatile char c = getchar1();     
 	if(c==1){

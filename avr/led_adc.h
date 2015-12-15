@@ -5,14 +5,10 @@
 
 //LED 초기화
 void init_led(){
-	// 전등(LED) 포트 = PA7~PA0 : 출력
+	// KIT LED 포트 = PA7~PA0 : 출력
 	DDRA = 0xff;
-}
-
-//조도센서 초기화
-void init_adc(){
-	ADMUX = 0x00;
-	ADCSRA = 0x87;
+	// 전등(LED) 포트 = PG7~PG0 : 출력
+	DDRG = 0xff;
 }
 
 //Kit 기본 LED를 count 만큼 켠다.
@@ -27,7 +23,18 @@ void setKitLed(int count){
 
 //연결된 LED를 count만큼 켠다.
 void setLight(int count){
+	int i;
 
+	PORTG = 0;
+	for(i=0;i<count;i++){
+		PORTG |= 1 << i;
+	}
+}
+
+//조도센서 초기화
+void init_adc(){
+	ADMUX = 0x00;
+	ADCSRA = 0x87;
 }
 
 //현재 조도 센서의 값을 읽어온다.
@@ -58,6 +65,8 @@ int get_auto()
 	return 0;
 }
 
+//조도센서 관련 디버깅 함수
+//조도값에 따라서 KIT의 LED를 조절한다.
 void show_adc()
 {
 	volatile unsigned short value = 0;

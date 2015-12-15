@@ -42,12 +42,24 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        boolean ret = mBluetoothManager.connect(deviceList.get(position));
-        if(ret){
-            Toast.makeText(this,"연결 성공",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(DeviceListActivity.this,MainActivity.class);
-            startActivity(intent);
-        }
+        mBluetoothManager.connect(deviceList.get(position), new BluetoothManager.BluetoothCallback() {
+            @Override
+            public void connect(final boolean ret) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(ret){
+                            Toast.makeText(DeviceListActivity.this,"연결 성공",Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(DeviceListActivity.this,MainActivity.class);
+                            startActivity(intent);
+                        }else {
+                            Toast.makeText(DeviceListActivity.this,"연결에 실패했습니다.",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+            }
+        });
     }
 
     class DeviceListAdapter extends BaseAdapter{
