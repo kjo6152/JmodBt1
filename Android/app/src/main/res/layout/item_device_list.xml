@@ -8,6 +8,7 @@
         android:layout_height="50dp"
         android:text="device name"
         android:gravity="center"
+        android:textColor="#353535"
         android:textSize="24sp"/>
 
 </LinearLayout>

@@ -2,8 +2,8 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:state_pressed="false"
-        android:drawable="@mipmap/button_blue_off256" />
+        android:drawable="@android:color/transparent" />
     <item
         android:state_pressed="true"
-        android:drawable="@mipmap/button_blue_on256" />
+        android:drawable="@mipmap/main_button_layer1" />
 </selector>
