@@ -52,20 +52,24 @@ public class BluetoothManager {
     /** 별도의 스레드에서 연결시도 */
     static Thread connectThread = null;
 
+    BluetoothCallback mCallback = null;
+    public void setCallback(BluetoothCallback callback){mCallback = callback;}
+    public void removetCallback(){mCallback = null;}
+
     /** 연결이 되었을 때 호출되는 콜백 인터페이스 */
-    interface BluetoothCallback {
-        void connect(boolean ret);
+    public interface BluetoothCallback {
+        void connect(BluetoothDevice device,boolean ret);
+        void disconnect(BluetoothDevice device);
     }
 
-    /**
-     * 블루투스 디바이스와 연결한다.
-     *
-     * @param device
-     * @return
-     */
-    public void connect(final BluetoothDevice device, final BluetoothCallback callback) {
+
+    BluetoothDevice mSelectedDevice = null;
+    public BluetoothDevice getSelectedDevice(){return mSelectedDevice;}
+
+    /** 블루투스 디바이스와 연결한다. */
+    public void connect(final BluetoothDevice device) {
         if (device == null) {
-            callback.connect(false);
+            if(mCallback!=null)mCallback.connect(device,false);
             return;
         }
 
@@ -82,12 +86,14 @@ public class BluetoothManager {
                     mBluetoothSocket.connect();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    callback.connect(false);
+                    if(mCallback!=null)mCallback.connect(device,false);
                     connectThread = null;
                     return;
                 }
-
-                callback.connect(true);
+                start();
+                mSelectedDevice = device;
+                connectThread = null;
+                if(mCallback!=null)mCallback.connect(device,true);
             }
         });
 
@@ -102,7 +108,7 @@ public class BluetoothManager {
     /** 블루투스 통신을 시작한다. */
     public void start() {
         if (mBluetoothThread != null) {
-            tearDown();
+            return;
         }
         mBluetoothThread = new BluetoothThread();
         mBluetoothThread.start();
@@ -137,7 +143,7 @@ public class BluetoothManager {
     public void sendMessage(final int msg) {
         if (isEanbled() == false) {
             Log.i(tag, "isEnabled false");
-            start();
+            connect(getSelectedDevice());
         }
 
         TimerTask task = new TimerTask() {
@@ -200,6 +206,8 @@ public class BluetoothManager {
                 interrupt();
             }
             mBluetoothThread = null;
+
+            if(mCallback!=null)mCallback.disconnect(getSelectedDevice());
         }
 
         Handler handler = new Handler(Looper.getMainLooper());

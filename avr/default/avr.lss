@@ -3,31 +3,31 @@ avr.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000400  00000000  00000000  00000074  2**1
+  0 .text         0000040c  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .bss          00000006  00800100  00800100  00000474  2**0
+  1 .bss          00000006  00800100  00800100  00000480  2**0
                   ALLOC
-  2 .stab         000006cc  00000000  00000000  00000474  2**2
+  2 .stab         000006cc  00000000  00000000  00000480  2**2
                   CONTENTS, READONLY, DEBUGGING
-  3 .stabstr      00000085  00000000  00000000  00000b40  2**0
+  3 .stabstr      00000085  00000000  00000000  00000b4c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  4 .debug_aranges 00000020  00000000  00000000  00000bc5  2**0
+  4 .debug_aranges 00000020  00000000  00000000  00000bd1  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_pubnames 00000149  00000000  00000000  00000be5  2**0
+  5 .debug_pubnames 00000149  00000000  00000000  00000bf1  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   0000040d  00000000  00000000  00000d2e  2**0
+  6 .debug_info   0000044e  00000000  00000000  00000d3a  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000001e5  00000000  00000000  0000113b  2**0
+  7 .debug_abbrev 000001e7  00000000  00000000  00001188  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   0000053c  00000000  00000000  00001320  2**0
+  8 .debug_line   00000542  00000000  00000000  0000136f  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000140  00000000  00000000  0000185c  2**2
+  9 .debug_frame  00000140  00000000  00000000  000018b4  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000001eb  00000000  00000000  0000199c  2**0
+ 10 .debug_str    000001eb  00000000  00000000  000019f4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000000f4  00000000  00000000  00001b87  2**0
+ 11 .debug_loc    000000f4  00000000  00000000  00001bdf  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_pubtypes 00000038  00000000  00000000  00001c7b  2**0
+ 12 .debug_pubtypes 00000038  00000000  00000000  00001cd3  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -90,8 +90,8 @@ Disassembly of section .text:
   a2:	a6 30       	cpi	r26, 0x06	; 6
   a4:	b1 07       	cpc	r27, r17
   a6:	e1 f7       	brne	.-8      	; 0xa0 <.do_clear_bss_loop>
-  a8:	0e 94 d0 01 	call	0x3a0	; 0x3a0 <main>
-  ac:	0c 94 fe 01 	jmp	0x3fc	; 0x3fc <_exit>
+  a8:	0e 94 d6 01 	call	0x3ac	; 0x3ac <main>
+  ac:	0c 94 04 02 	jmp	0x408	; 0x408 <_exit>
 
 000000b0 <__bad_interrupt>:
   b0:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -519,7 +519,7 @@ void setNextState(){
  2a2:	01 96       	adiw	r24, 0x01	; 1
  2a4:	65 e0       	ldi	r22, 0x05	; 5
  2a6:	70 e0       	ldi	r23, 0x00	; 0
- 2a8:	0e 94 d7 01 	call	0x3ae	; 0x3ae <__divmodhi4>
+ 2a8:	0e 94 dd 01 	call	0x3ba	; 0x3ba <__divmodhi4>
  2ac:	90 93 03 01 	sts	0x0103, r25
  2b0:	80 93 02 01 	sts	0x0102, r24
 }
@@ -677,89 +677,94 @@ void run(){
 		}
 
 		//LED를 켠다.
-		setKitLed(ledCount);
- 386:	80 91 04 01 	lds	r24, 0x0104
- 38a:	90 91 05 01 	lds	r25, 0x0105
+		setKitLed(ledState);
+ 386:	80 91 02 01 	lds	r24, 0x0102
+ 38a:	90 91 03 01 	lds	r25, 0x0103
  38e:	0e 94 94 00 	call	0x128	; 0x128 <setKitLed>
 		setLight(ledCount); 
  392:	80 91 04 01 	lds	r24, 0x0104
  396:	90 91 05 01 	lds	r25, 0x0105
  39a:	0e 94 aa 00 	call	0x154	; 0x154 <setLight>
-    }
- 39e:	c9 cf       	rjmp	.-110    	; 0x332 <run+0x4>
+ 39e:	87 ea       	ldi	r24, 0xA7	; 167
+ 3a0:	91 e6       	ldi	r25, 0x61	; 97
+ 3a2:	01 97       	sbiw	r24, 0x01	; 1
+ 3a4:	f1 f7       	brne	.-4      	; 0x3a2 <run+0x74>
+ 3a6:	00 c0       	rjmp	.+0      	; 0x3a8 <run+0x7a>
+ 3a8:	00 00       	nop
+ 3aa:	c3 cf       	rjmp	.-122    	; 0x332 <run+0x4>
 
-000003a0 <main>:
+000003ac <main>:
 }
 
 int main()
 {
 	//디바이스 초기화
     init();
- 3a0:	0e 94 8e 01 	call	0x31c	; 0x31c <init>
+ 3ac:	0e 94 8e 01 	call	0x31c	; 0x31c <init>
     //작업 수행
  	run();
- 3a4:	0e 94 97 01 	call	0x32e	; 0x32e <run>
+ 3b0:	0e 94 97 01 	call	0x32e	; 0x32e <run>
 
 }
- 3a8:	80 e0       	ldi	r24, 0x00	; 0
- 3aa:	90 e0       	ldi	r25, 0x00	; 0
- 3ac:	08 95       	ret
+ 3b4:	80 e0       	ldi	r24, 0x00	; 0
+ 3b6:	90 e0       	ldi	r25, 0x00	; 0
+ 3b8:	08 95       	ret
 
-000003ae <__divmodhi4>:
- 3ae:	97 fb       	bst	r25, 7
- 3b0:	09 2e       	mov	r0, r25
- 3b2:	07 26       	eor	r0, r23
- 3b4:	0a d0       	rcall	.+20     	; 0x3ca <__divmodhi4_neg1>
- 3b6:	77 fd       	sbrc	r23, 7
- 3b8:	04 d0       	rcall	.+8      	; 0x3c2 <__divmodhi4_neg2>
- 3ba:	0c d0       	rcall	.+24     	; 0x3d4 <__udivmodhi4>
- 3bc:	06 d0       	rcall	.+12     	; 0x3ca <__divmodhi4_neg1>
- 3be:	00 20       	and	r0, r0
- 3c0:	1a f4       	brpl	.+6      	; 0x3c8 <__divmodhi4_exit>
+000003ba <__divmodhi4>:
+ 3ba:	97 fb       	bst	r25, 7
+ 3bc:	09 2e       	mov	r0, r25
+ 3be:	07 26       	eor	r0, r23
+ 3c0:	0a d0       	rcall	.+20     	; 0x3d6 <__divmodhi4_neg1>
+ 3c2:	77 fd       	sbrc	r23, 7
+ 3c4:	04 d0       	rcall	.+8      	; 0x3ce <__divmodhi4_neg2>
+ 3c6:	0c d0       	rcall	.+24     	; 0x3e0 <__udivmodhi4>
+ 3c8:	06 d0       	rcall	.+12     	; 0x3d6 <__divmodhi4_neg1>
+ 3ca:	00 20       	and	r0, r0
+ 3cc:	1a f4       	brpl	.+6      	; 0x3d4 <__divmodhi4_exit>
 
-000003c2 <__divmodhi4_neg2>:
- 3c2:	70 95       	com	r23
- 3c4:	61 95       	neg	r22
- 3c6:	7f 4f       	sbci	r23, 0xFF	; 255
+000003ce <__divmodhi4_neg2>:
+ 3ce:	70 95       	com	r23
+ 3d0:	61 95       	neg	r22
+ 3d2:	7f 4f       	sbci	r23, 0xFF	; 255
 
-000003c8 <__divmodhi4_exit>:
- 3c8:	08 95       	ret
+000003d4 <__divmodhi4_exit>:
+ 3d4:	08 95       	ret
 
-000003ca <__divmodhi4_neg1>:
- 3ca:	f6 f7       	brtc	.-4      	; 0x3c8 <__divmodhi4_exit>
- 3cc:	90 95       	com	r25
- 3ce:	81 95       	neg	r24
- 3d0:	9f 4f       	sbci	r25, 0xFF	; 255
- 3d2:	08 95       	ret
+000003d6 <__divmodhi4_neg1>:
+ 3d6:	f6 f7       	brtc	.-4      	; 0x3d4 <__divmodhi4_exit>
+ 3d8:	90 95       	com	r25
+ 3da:	81 95       	neg	r24
+ 3dc:	9f 4f       	sbci	r25, 0xFF	; 255
+ 3de:	08 95       	ret
 
-000003d4 <__udivmodhi4>:
- 3d4:	aa 1b       	sub	r26, r26
- 3d6:	bb 1b       	sub	r27, r27
- 3d8:	51 e1       	ldi	r21, 0x11	; 17
- 3da:	07 c0       	rjmp	.+14     	; 0x3ea <__udivmodhi4_ep>
+000003e0 <__udivmodhi4>:
+ 3e0:	aa 1b       	sub	r26, r26
+ 3e2:	bb 1b       	sub	r27, r27
+ 3e4:	51 e1       	ldi	r21, 0x11	; 17
+ 3e6:	07 c0       	rjmp	.+14     	; 0x3f6 <__udivmodhi4_ep>
 
-000003dc <__udivmodhi4_loop>:
- 3dc:	aa 1f       	adc	r26, r26
- 3de:	bb 1f       	adc	r27, r27
- 3e0:	a6 17       	cp	r26, r22
- 3e2:	b7 07       	cpc	r27, r23
- 3e4:	10 f0       	brcs	.+4      	; 0x3ea <__udivmodhi4_ep>
- 3e6:	a6 1b       	sub	r26, r22
- 3e8:	b7 0b       	sbc	r27, r23
+000003e8 <__udivmodhi4_loop>:
+ 3e8:	aa 1f       	adc	r26, r26
+ 3ea:	bb 1f       	adc	r27, r27
+ 3ec:	a6 17       	cp	r26, r22
+ 3ee:	b7 07       	cpc	r27, r23
+ 3f0:	10 f0       	brcs	.+4      	; 0x3f6 <__udivmodhi4_ep>
+ 3f2:	a6 1b       	sub	r26, r22
+ 3f4:	b7 0b       	sbc	r27, r23
 
-000003ea <__udivmodhi4_ep>:
- 3ea:	88 1f       	adc	r24, r24
- 3ec:	99 1f       	adc	r25, r25
- 3ee:	5a 95       	dec	r21
- 3f0:	a9 f7       	brne	.-22     	; 0x3dc <__udivmodhi4_loop>
- 3f2:	80 95       	com	r24
- 3f4:	90 95       	com	r25
- 3f6:	bc 01       	movw	r22, r24
- 3f8:	cd 01       	movw	r24, r26
- 3fa:	08 95       	ret
+000003f6 <__udivmodhi4_ep>:
+ 3f6:	88 1f       	adc	r24, r24
+ 3f8:	99 1f       	adc	r25, r25
+ 3fa:	5a 95       	dec	r21
+ 3fc:	a9 f7       	brne	.-22     	; 0x3e8 <__udivmodhi4_loop>
+ 3fe:	80 95       	com	r24
+ 400:	90 95       	com	r25
+ 402:	bc 01       	movw	r22, r24
+ 404:	cd 01       	movw	r24, r26
+ 406:	08 95       	ret
 
-000003fc <_exit>:
- 3fc:	f8 94       	cli
+00000408 <_exit>:
+ 408:	f8 94       	cli
 
-000003fe <__stop_program>:
- 3fe:	ff cf       	rjmp	.-2      	; 0x3fe <__stop_program>
+0000040a <__stop_program>:
+ 40a:	ff cf       	rjmp	.-2      	; 0x40a <__stop_program>

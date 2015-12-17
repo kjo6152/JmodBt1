@@ -38,28 +38,53 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
         view.setAdapter(adapter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mBluetoothManager.setCallback(callback);
+
+        if(mBluetoothManager.isEanbled()){
+            Intent intent = new Intent(DeviceListActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mBluetoothManager.removetCallback();
+    }
+
+    BluetoothManager.BluetoothCallback callback = new BluetoothManager.BluetoothCallback(){
+        @Override
+        public void connect(BluetoothDevice device, final boolean ret) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (ret) {
+                        Toast.makeText(DeviceListActivity.this, "연결 성공", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(DeviceListActivity.this, MainActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(DeviceListActivity.this, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void disconnect(BluetoothDevice device) {
+
+        }
+    };
+
     ArrayList<BluetoothDevice> deviceList = new ArrayList<>();
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mBluetoothManager.connect(deviceList.get(position), new BluetoothManager.BluetoothCallback() {
-            @Override
-            public void connect(final boolean ret) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(ret){
-                            Toast.makeText(DeviceListActivity.this,"연결 성공",Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(DeviceListActivity.this,MainActivity.class);
-                            startActivity(intent);
-                        }else {
-                            Toast.makeText(DeviceListActivity.this,"연결에 실패했습니다.",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-            }
-        });
+        mBluetoothManager.connect(deviceList.get(position));
     }
 
     class DeviceListAdapter extends BaseAdapter{

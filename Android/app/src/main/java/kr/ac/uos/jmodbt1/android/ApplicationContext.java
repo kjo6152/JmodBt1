@@ -24,6 +24,8 @@ public class ApplicationContext extends Application {
     public void onTerminate() {
         super.onTerminate();
 
+        mBluetoothManager.tearDown();
+
         Log.i(tag,"onTerminate");
     }
 

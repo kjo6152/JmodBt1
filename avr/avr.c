@@ -89,8 +89,11 @@ void run(){
 		}
 
 		//LED¸¦ ÄÒ´Ù.
-		setKitLed(ledCount);
+		setKitLed(ledState);
 		setLight(ledCount); 
+
+
+		_delay_ms(100);
     }
 
 }
