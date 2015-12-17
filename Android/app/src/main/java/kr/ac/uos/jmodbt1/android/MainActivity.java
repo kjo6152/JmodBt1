@@ -38,9 +38,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         refresh = ((ImageView) findViewById(R.id.main_refresh));
         deviceName = ((TextView) findViewById(R.id.main_device_name));
 
-        text_on = ((ImageView) findViewById(R.id.main_button_text_on));
-        text_off = ((ImageView) findViewById(R.id.main_button_text_off));
-
         refresh.setOnClickListener(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
@@ -73,13 +70,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 deviceName.setText(mBluetoothManager.getSelectedDevice().getName());
                 if (mBluetoothManager.isEanbled()) {
                     status.setImageResource(R.mipmap.main_button_layer3_on);
-                    text_on.setVisibility(View.VISIBLE);
-                    text_off.setVisibility(View.INVISIBLE);
                 } else {
                     status.setImageResource(R.mipmap.main_button_layer3_off);
-
-                    text_on.setVisibility(View.INVISIBLE);
-                    text_off.setVisibility(View.VISIBLE);
                 }
             }
         });

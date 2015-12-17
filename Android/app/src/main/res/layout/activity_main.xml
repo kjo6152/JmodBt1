@@ -42,21 +42,6 @@
             android:layout_centerInParent="true"
             android:src="@mipmap/main_button_layer3_on"/>
 
-        <ImageView
-            android:id="@+id/main_button_text_on"
-            android:layout_width="50dp"
-            android:layout_height="30dp"
-            android:layout_centerInParent="true"
-            android:src="@mipmap/main_button_text_on"/>
-
-        <ImageView
-            android:id="@+id/main_button_text_off"
-            android:layout_width="64.25dp"
-            android:layout_height="26.25dp"
-            android:layout_centerInParent="true"
-            android:visibility="invisible"
-            android:src="@mipmap/main_button_text_off"/>
-
     </RelativeLayout>
 
     <!-- refresh -->
@@ -68,4 +53,18 @@
         android:layout_height="84.25dp"
         android:src="@mipmap/main_button_refresh"
         android:clickable="true"/>
+
+    <ImageView
+        android:layout_marginTop="478.25dp"
+        android:layout_marginLeft="158dp"
+        android:layout_width="23.75dp"
+        android:layout_height="37.5dp"
+        android:src="@mipmap/main_refresh_icon_left"/>
+
+    <ImageView
+        android:layout_marginTop="474.75dp"
+        android:layout_marginLeft="180.5dp"
+        android:layout_width="23.75dp"
+        android:layout_height="37.5dp"
+        android:src="@mipmap/main_refresh_icon_right"/>
 </RelativeLayout>
